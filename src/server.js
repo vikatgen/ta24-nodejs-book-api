@@ -10,7 +10,7 @@ app.get('/welcome', (request, response) => {
     });
 });
 
-app.use(bookRoutes);
+app.use('/api/v1', bookRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
