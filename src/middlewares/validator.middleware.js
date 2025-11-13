@@ -1,3 +1,5 @@
+import * as path from "node:path";
+
 export const validate = (schema) => {
     return (request, response, next) => {
         const { error } = schema.validate(request.body, {
@@ -14,16 +16,17 @@ export const validate = (schema) => {
             return next();
         }
 
-        const errorBag = error.details.map((detail) => ({
-            path: detail.path[0],
-            message: detail.message
-        }));
+        const errorBag = error.details.reduce((acc, detail) => {
+            acc[detail.path[0]] = {
+                message: detail.message
+            };
 
-        console.log(errorBag)
+            return acc;
+        }, {});
 
         response.status(400).json({
             message: "ValidationError",
-            error: {...errorBag }
+            errors: { ...errorBag }
         })
 
     };

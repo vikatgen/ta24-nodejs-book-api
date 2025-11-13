@@ -53,7 +53,7 @@ export const createBook = async (request, response) => {
                 title,
                 description,
                 thumbnail_url,
-                release_year,
+                release_year: Number(release_year),
             }
         });
 
@@ -82,7 +82,7 @@ export const updateBook = async (request, response) => {
                 title,
                 description,
                 thumbnail_url,
-                release_year,
+                release_year: Number(release_year),
             }
         });
 
