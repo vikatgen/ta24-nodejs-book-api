@@ -49,10 +49,12 @@ export const createBook = async (request, response) => {
         const { title, description, thumbnail_url, release_year } = request.body;
 
         const newBook = await prisma.book.create({
-            title,
-            description,
-            thumbnail_url,
-            release_year,
+            data: {
+                title,
+                description,
+                thumbnail_url,
+                release_year,
+            }
         });
 
         response.status(201).json({

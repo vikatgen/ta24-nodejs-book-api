@@ -4,6 +4,8 @@ import bookRoutes from './routes/book.routes.js';
 const app = express();
 const PORT = 3000;
 
+app.use(express.json());
+
 app.get('/welcome', (request, response) => {
     response.send({
         message: 'Welcome to the API',
