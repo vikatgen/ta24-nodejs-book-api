@@ -3,10 +3,6 @@ import prisma from '../config/prisma.js';
 export const getAllBooks = async (request, response) => {
     try {
 
-        // GET https://raamatukogu.ee/api/v1/books?sort=title&include=authors
-
-        // pageSize * (pageNumber - 1) => skip: 10 * (5 - 1);
-
         const { sort, take, sort_direction, page } = request.query;
         console.log(request.query);
 
