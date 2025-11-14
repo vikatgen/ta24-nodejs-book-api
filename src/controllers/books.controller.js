@@ -1,25 +1,23 @@
 import prisma from '../config/prisma.js';
+import { buildPaginationMeta, QueryBuilder } from "../utils/QueryBuilder.js";
 
 export const getAllBooks = async (request, response) => {
     try {
 
-        const { sort, take, sort_direction, page } = request.query;
-        console.log(request.query);
+        const prismaQuery = QueryBuilder(request.body, 'book');
 
+        const [books, count] = await Promise.all([
+            prisma.book.findMany(prismaQuery),
+            prisma.book.count({ where: prismaQuery.where })
+        ]);
 
+        const meta = await buildPaginationMeta('book', request.query, count);
 
-        const books = await prisma.book.findMany({
-            orderBy: {
-                [sort]: sort_direction
-            },
-            skip: Number(take) * (Number(page) - 1),
-            take: Number(take) ?? 10
-        });
-
-        response.json({
+        response.status(200).json({
             message: 'All books',
-            data: books
-        })
+            data: books,
+            meta,
+        });
     } catch (exception) {
         console.log(exception);
         response.status(500).json({
