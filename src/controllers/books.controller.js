@@ -2,7 +2,24 @@ import prisma from '../config/prisma.js';
 
 export const getAllBooks = async (request, response) => {
     try {
-        const books = await prisma.book.findMany();
+
+        // GET https://raamatukogu.ee/api/v1/books?sort=title&include=authors
+
+        // pageSize * (pageNumber - 1) => skip: 10 * (5 - 1);
+
+        const { sort, take, sort_direction, page } = request.query;
+        console.log(request.query);
+
+
+
+        const books = await prisma.book.findMany({
+            orderBy: {
+                [sort]: sort_direction
+            },
+            skip: Number(take) * (Number(page) - 1),
+            take: Number(take) ?? 10
+        });
+
         response.json({
             message: 'All books',
             data: books

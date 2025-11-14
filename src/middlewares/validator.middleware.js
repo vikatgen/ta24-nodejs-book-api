@@ -1,5 +1,3 @@
-import * as path from "node:path";
-
 export const validate = (schema) => {
     return (request, response, next) => {
         const { error } = schema.validate(request.body, {
