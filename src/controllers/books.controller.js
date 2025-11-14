@@ -1,17 +1,26 @@
 import prisma from '../config/prisma.js';
-import { buildPaginationMeta, QueryBuilder } from "../utils/QueryBuilder.js";
+import { QueryBuilder } from "../utils/QueryBuilder.js";
 
 export const getAllBooks = async (request, response) => {
     try {
+        const Builder = new QueryBuilder(request.query, {
+            defaultSort: 'created_at',
+            defaultSortDirection: 'desc',
+            defaultTake: 20,
+            allowedSortFields: ['id', 'title', 'description', 'created_at', 'updated_at'],
+            allowedSearchFields: ['title', 'description'],
+        });
 
-        const prismaQuery = QueryBuilder(request.body, 'book');
+        const prismaQuery = Builder.buildPrismaQuery();
+
+        console.log(prismaQuery);
 
         const [books, count] = await Promise.all([
             prisma.book.findMany(prismaQuery),
             prisma.book.count({ where: prismaQuery.where })
         ]);
 
-        const meta = await buildPaginationMeta('book', request.query, count);
+        const meta = Builder.getPaginationMeta(count);
 
         response.status(200).json({
             message: 'All books',

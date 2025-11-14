@@ -1,55 +1,96 @@
-export const QueryBuilder = (query, model) => {
-    const { page, take, sort, sort_direction, search, search_fields, include } = query;
+export class QueryBuilder {
 
-    const prismaQuery = {};
-
-    prismaQuery.skip = (page - 1) * take;
-    prismaQuery.take = take;
-
-    if (sort) {
-        prismaQuery.orderBy = {
-            [sort]: sort_direction,
+    constructor(queryParams = {}, options = {}) {
+        this.params = queryParams;
+        this.options = {
+            defaultPage: 1,
+            defaultTake: 10,
+            defaultSort: 'id',
+            defaultSortDirection: 'asc',
+            allowedSorts: ['id'],
+            allowedIncludes: [],
+            allowedSearchFields: [],
+            ...options
         }
-    }
+    };
 
-    if (search && search_fields.length > 0) {
-        prismaQuery.where = {
-            OR: search_fields.map(field => ({
+    getPagination() {
+        const page = Number(this.params.page) ?? this.options.defaultPage;
+        const take = Number(this.params.take) ?? this.options.defaultTake;
+
+        return {
+            skip: (page - 1) * take,
+            take
+        }
+    };
+
+    getSorting() {
+        const sort = this.params.sort ?? this.options.defaultSort;
+        const direction = this.params.sort_direction ?? this.options.defaultSortDirection;
+
+        if (!sort || !this.options.allowedSearchFields.includes(sort)) return null;
+
+        return {
+            [sort]: direction,
+        }
+    };
+
+    getSearchFilter() {
+        const search = this.params.search;
+        let searchFields = this.params.search_fields;
+
+        if (!search) return null;
+
+        if(!searchFields || !Array.isArray(searchFields) || !searchFields.length) {
+            searchFields = this.options.allowedSearchFields;
+        } else {
+            searchFields = searchFields.filter(field => this.options.allowedSearchFields.includes(field));
+        }
+
+        if (!searchFields.length) return null;
+
+        return {
+            OR: searchFields.map(field => ({
                 [field]: {
                     contains: search
-                },
+                }
             }))
         }
+    };
+
+    buildPrismaQuery() {
+        const query = {};
+
+        const pagination = this.getPagination();
+        query.skip = pagination.skip;
+        query.take = pagination.take;
+
+        const sorting = this.getSorting();
+        if (sorting) {
+            query.orderBy = sorting;
+        }
+
+        const searchFilter = this.getSearchFilter();
+        if (searchFilter) {
+            query.where = searchFilter;
+        }
+
+        return query;
     }
 
-    if (Array.isArray(include) && include) {
-        prismaQuery.include = {};
+    getPaginationMeta(count) {
+        const page = Number(this.params.page) ?? this.options.defaultPage;
+        const take = Number(this.params.take) ?? this.options.defaultTake;
+        const total_pages = Math.ceil(count / take) ?? 1;
 
-        include.forEach(relation => {
-            if (relation === 'authors') {
-                prismaQuery.include.authors = {
-                    include: {
-                        author: true
-                    }
-                }
-            }
-        })
-    }
+        return {
+            current_page: page,
+            per_page: take,
+            total: count ?? 0,
+            total_pages: total_pages ?? 0,
+            has_next_page: page < total_pages,
+            has_prev_page: page > 1,
+        }
 
-    return prismaQuery;
-};
-
-
-export const buildPaginationMeta = async (model, query, totalCount) => {
-    const { take, page } = query;
-    const totalPages = Math.ceil(totalCount / take);
-
-    return {
-        current_page: page,
-        per_page: take,
-        total_pages: totalPages,
-        total: totalCount,
-        has_next_page: page < totalPages,
-        has_previous_page: page > 1
     }
 }

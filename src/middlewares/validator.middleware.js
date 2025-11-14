@@ -10,23 +10,30 @@ export const validate = (schema, source = 'body') => {
             }
         });
 
-        if (!error) {
-            request[source] = value;
-            return next();
+        if(error) {
+            const errorBag = {};
+
+            error.details.forEach((detail) => {
+                errorBag[detail.path] = {
+                    message: detail.message,
+                };
+            });
+
+            return response.status(400).json({
+                message: "ValidationError",
+                errors: errorBag,
+            })
         }
 
-        const errorBag = error.details.reduce((acc, detail) => {
-            acc[detail.path[0]] = {
-                message: detail.message
-            };
+        if(source === 'query') {
+            Object.keys(value).forEach((key) => {
+                request.query[key] = value[key];
+            });
+        } else {
+            request[source] = value;
+        }
 
-            return acc;
-        }, {});
-
-        response.status(400).json({
-            message: "ValidationError",
-            errors: { ...errorBag }
-        })
+        next();
 
     };
 };
