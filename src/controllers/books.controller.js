@@ -5,10 +5,12 @@ export const getAllBooks = async (request, response) => {
     try {
         const Builder = new QueryBuilder(request.query, {
             defaultSort: 'created_at',
-            defaultSortDirection: 'desc',
             defaultTake: 20,
-            allowedSortFields: ['id', 'title', 'description', 'created_at', 'updated_at'],
+            allowedSorts: ['id', 'title', 'description', 'created_at', 'updated_at'],
             allowedSearchFields: ['title', 'description'],
+            allowedIncludes: {
+                'authors': { include: { author: true }}
+            }
         });
 
         const prismaQuery = Builder.buildPrismaQuery();

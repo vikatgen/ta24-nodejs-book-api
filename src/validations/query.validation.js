@@ -18,6 +18,5 @@ export const createQuerySchema = (options = {}) => {
         sort_direction: Joi.string().valid('asc', 'desc').default(defaultSortDirection),
         search: Joi.string().optional().default(''),
         search_fields: Joi.array().valid(...allowedSearchFields).optional(),
-        include: Joi.array().valid(...allowedIncludes).optional(),
     });
 }

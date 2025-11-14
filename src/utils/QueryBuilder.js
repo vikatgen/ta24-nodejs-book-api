@@ -6,7 +6,6 @@ export class QueryBuilder {
             defaultPage: 1,
             defaultTake: 10,
             defaultSort: 'id',
-            defaultSortDirection: 'asc',
             allowedSorts: ['id'],
             allowedIncludes: [],
             allowedSearchFields: [],
@@ -15,8 +14,15 @@ export class QueryBuilder {
     };
 
     getPagination() {
-        const page = Number(this.params.page) ?? this.options.defaultPage;
-        const take = Number(this.params.take) ?? this.options.defaultTake;
+        let page = this.params.page ? Number(this.params.page) : this.options.defaultPage;
+        let take = this.params.take ? Number(this.params.take) : this.options.defaultTake;
+
+        page = isNaN(page) || page < 1 ? this.options.defaultPage : page;
+        take = isNaN(take) || take < 1 ? this.options.defaultTake : take;
+
+        console.log("Page: ", page);
+        console.log((page - 1) * take);
+
 
         return {
             skip: (page - 1) * take,
@@ -25,19 +31,29 @@ export class QueryBuilder {
     };
 
     getSorting() {
-        const sort = this.params.sort ?? this.options.defaultSort;
-        const direction = this.params.sort_direction ?? this.options.defaultSortDirection;
+        let sort = this.params.sort ?? this.options.defaultSort;
+        let direction;
 
-        if (!sort || !this.options.allowedSearchFields.includes(sort)) return null;
+        if (!sort) return null;
+
+        let sortField = sort;
+        if (sort.startsWith('-')) {
+            direction = 'desc'
+            sortField = sort.substring(1);
+        } else {
+            direction = 'asc'
+        }
+
+        if (!this.options.allowedSorts.includes(sortField)) return null;
 
         return {
-            [sort]: direction,
+            [sortField]: direction,
         }
     };
 
     getSearchFilter() {
-        const search = this.params.search;
-        let searchFields = this.params.search_fields;
+        const search = this.params.search ?? '';
+        let searchFields = this.options.allowedSearchFields;
 
         if (!search) return null;
 
@@ -58,6 +74,33 @@ export class QueryBuilder {
         }
     };
 
+    getIncludes() {
+        const includes = this.params.include?.split(',') ?? [];
+        if (!Array.isArray(includes)) return;
+
+        let includesList = {};
+
+        const allowedIncludesList = Array.isArray(this.options.allowedIncludes)
+            ? this.options.allowedIncludes
+            : Object.keys(this.options.allowedIncludes);
+
+        includes.forEach(relation => {
+            if (!allowedIncludesList.includes(relation)) return null;
+
+            if (!Array.isArray(this.options.allowedIncludes) && this.options.allowedIncludes[relation]) {
+                includesList[relation] = this.options.allowedIncludes[relation];
+            } else {
+                includesList[relation] = true;
+            }
+        })
+
+        if (!Object.keys(includesList).length) return null;
+
+        return {
+            ...includesList
+        }
+    }
+
     buildPrismaQuery() {
         const query = {};
 
@@ -75,13 +118,18 @@ export class QueryBuilder {
             query.where = searchFilter;
         }
 
+        const includes = this.getIncludes();
+        if (includes) {
+            query.include = includes
+        }
+
         return query;
     }
 
     getPaginationMeta(count) {
-        const page = Number(this.params.page) ?? this.options.defaultPage;
-        const take = Number(this.params.take) ?? this.options.defaultTake;
-        const total_pages = Math.ceil(count / take) ?? 1;
+        const page = this.params.page ? Number(this.params.page) : this.options.defaultPage;
+        const take = this.params.take ? Number(this.params.take) : this.options.defaultTake;
+        const total_pages = Math.ceil(count / take) || 1;
 
         return {
             current_page: page,
