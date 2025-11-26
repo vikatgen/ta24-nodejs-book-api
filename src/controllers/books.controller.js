@@ -1,25 +1,34 @@
 import prisma from '../config/prisma.js';
+import { QueryBuilder } from "../utils/QueryBuilder.js";
 
 export const getAllBooks = async (request, response) => {
     try {
-
-        const { sort, take, sort_direction, page } = request.query;
-        console.log(request.query);
-
-
-
-        const books = await prisma.book.findMany({
-            orderBy: {
-                [sort]: sort_direction
-            },
-            skip: Number(take) * (Number(page) - 1),
-            take: Number(take) ?? 10
+        const Builder = new QueryBuilder(request.query, {
+            defaultSort: 'created_at',
+            defaultTake: 20,
+            allowedSorts: ['id', 'title', 'description', 'created_at', 'updated_at'],
+            allowedSearchFields: ['title', 'description'],
+            allowedIncludes: {
+                'authors': { include: { author: true }}
+            }
         });
 
-        response.json({
+        const prismaQuery = Builder.buildPrismaQuery();
+
+        console.log(prismaQuery);
+
+        const [books, count] = await Promise.all([
+            prisma.book.findMany(prismaQuery),
+            prisma.book.count({ where: prismaQuery.where })
+        ]);
+
+        const meta = Builder.getPaginationMeta(count);
+
+        response.status(200).json({
             message: 'All books',
-            data: books
-        })
+            data: books,
+            meta,
+        });
     } catch (exception) {
         console.log(exception);
         response.status(500).json({
