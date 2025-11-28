@@ -49,3 +49,42 @@ export const create = async (request, response, next) => {
         next(exception);
     }
 }
+
+export const update = async (request, response, next) => {
+    try {
+        const { id } = request.params;
+        const { name } = request.body;
+
+        const updatedCategory = await prisma.category.update({
+            where: { id: Number(id) },
+            data: { name }
+        });
+
+        if (!updatedCategory) {
+            response.status(404).json({
+                message: 'Category not found',
+            })
+        }
+
+        response.status(200).json({
+            message: 'Category updated',
+            updatedCategory
+        })
+    } catch (exception) {
+        next(exception);
+    }
+};
+
+export const destroy = async (request, response, next) => {
+    try {
+        const { id } = request.params;
+
+        await prisma.category.delete({ where: { id: Number(id) } });
+
+        response.status(204).json({
+            message: 'Category deleted',
+        })
+    } catch (exception) {
+        next(exception);
+    }
+}
