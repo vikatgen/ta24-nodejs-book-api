@@ -15,8 +15,6 @@ export const getAllBooks = async (request, response) => {
 
         const prismaQuery = Builder.buildPrismaQuery();
 
-        console.log(prismaQuery);
-
         const [books, count] = await Promise.all([
             prisma.book.findMany(prismaQuery),
             prisma.book.count({ where: prismaQuery.where })

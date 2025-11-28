@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import prisma from '../config/prisma.js';
-import {request, response} from "express";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const register = async (request, response, next) => {
     try {
