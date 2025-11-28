@@ -4,10 +4,25 @@ import { faker } from "@faker-js/faker/locale/en";
 const databaseSeeder = async () => {
     await prisma.author.deleteMany();
     await prisma.book.deleteMany();
+    await prisma.category.deleteMany();
 
     console.log('🌱 Starting to seed database...');
 
-    const authors = [];
+    let authors = [];
+    let categories = faker.helpers.uniqueArray(() => faker.book.genre(), 15);
+
+    let categoriesFromDatabase = [];
+
+    console.log("🍆🍆🍆 Generating categories...")
+
+    for (const category of categories) {
+        const createdCategory = await prisma.category.create({
+            data: {
+                name: category,
+            }
+        });
+        categoriesFromDatabase.push(createdCategory);
+    }
 
     console.log("🧐 Generating authors...");
 
@@ -21,10 +36,14 @@ const databaseSeeder = async () => {
         authors.push(author);
     }
 
+    console.log(categoriesFromDatabase);
+
     console.log("📚 Generating books...");
 
     for(let i = 0; i < 50; i++) {
         const randomAuthor = authors[faker.number.int({ min: 0, max: authors.length - 1})];
+        const randomCategory = categoriesFromDatabase[faker.number.int({ min: 0, max: categoriesFromDatabase.length - 1})];
+
 
         const book = await prisma.book.create({
             data: {
@@ -32,6 +51,13 @@ const databaseSeeder = async () => {
                 description: faker.lorem.sentence(),
                 thumbnail_url: faker.image.url(),
                 release_year: new Date(faker.date.anytime()).getFullYear(),
+                categories: {
+                    create: {
+                        category: {
+                            connect: { id: randomCategory.id }
+                        }
+                    }
+                },
                 authors: {
                     create: {
                         author: {

@@ -22,6 +22,7 @@ model Book {
   thumbnail_url String
   release_year  Int
   authors       AuthorOnBook[]
+  categories CategoryOnBook[]
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
 }
@@ -34,12 +35,30 @@ model Author {
   updated_at DateTime       @updatedAt
 }
 
+model Category {
+  id Int @id @default(autoincrement())
+  name String @unique
+  books CategoryOnBook[]
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+}
+
 model AuthorOnBook {
   id         Int      @id @default(autoincrement())
   book       Book     @relation(fields: [book_id], references: [id], onDelete: Cascade)
   book_id    Int
   author     Author   @relation(fields: [author_id], references: [id], onDelete: Cascade)
   author_id  Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model CategoryOnBook {
+  id Int @id @default(autoincrement())
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  book_id Int
+  category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  category_id Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
