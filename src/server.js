@@ -3,6 +3,7 @@ import bookRoutes from './routes/book.routes.js';
 import authorRoutes from "./routes/author.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 const PORT = 3000;
@@ -19,6 +20,8 @@ app.use('/api/v1', authRoutes);
 app.use('/api/v1', bookRoutes);
 app.use('/api/v1', authorRoutes);
 app.use('/api/v1', categoryRoutes);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

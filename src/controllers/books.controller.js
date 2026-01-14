@@ -1,5 +1,7 @@
 import prisma from '../config/prisma.js';
 import { QueryBuilder } from "../utils/QueryBuilder.js";
+import AppError from "../utils/AppError.js";
+import NotFoundError from "../utils/NotFoundError.js";
 
 export const getAllBooks = async (request, response) => {
     try {
@@ -36,7 +38,7 @@ export const getAllBooks = async (request, response) => {
     }
 };
 
-export const getBookById = async (request, response) => {
+export const getBookById = async (request, response, next) => {
     try {
         const idFromURL = request.params?.id;
 
@@ -46,21 +48,14 @@ export const getBookById = async (request, response) => {
             }
         });
 
-        if (!book) {
-            response.status(404).json({
-                message: 'Not Found'
-            })
-        }
+        if (!book) throw new NotFoundError(`Book with id ${idFromURL} not found`);
 
         response.status(200).json({
             message: 'Successfully Found Book',
             data: book
         })
     } catch (exception) {
-        response.status(500).json({
-            message: 'Something went wrong',
-            error: exception.message
-        })
+        next(exception);
     }
 };
 
