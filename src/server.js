@@ -23,6 +23,16 @@ app.use('/api/v1', categoryRoutes);
 
 app.use(errorHandler);
 
+process.on("uncaughtException", (err) => {
+    console.error("Uncaught Exception:", err.message);
+    process.exit(1);
+});
+
+process.on("unhandledRejection", (err) => {
+    console.error("Unhandled Promise Rejection:", err.message);
+    process.exit(1);
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
