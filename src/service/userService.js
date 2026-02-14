@@ -1,4 +1,4 @@
-import NotFoundError from "../utils/NotFoundError.js";
+import AuthenticationError from "../utils/AuthenticationError.js";
 
 class UserService {
 
@@ -8,7 +8,7 @@ class UserService {
 
     async getUserByEmail(email) {
         const user = await this.repository.getUserByEmail(email);
-        if (!user) throw new NotFoundError(`No user found.`);
+        if (!user) throw new AuthenticationError("Invalid credentials");
 
         return user;
     }

@@ -30,7 +30,7 @@ class CategoryController {
             const { name } = request.body;
             await this.categoryService.updateCategory(id, name);
 
-            response.sendStatus(200)
+            response.sendStatus(200);
         } catch (exception) {
             next(exception);
         }
@@ -41,7 +41,7 @@ class CategoryController {
             const { id } = request.params;
             await this.categoryService.deleteCategory(Number(id));
 
-            response.sendStatus(204)
+            response.sendStatus(204);
         } catch (exception) {
             next(exception);
         }
