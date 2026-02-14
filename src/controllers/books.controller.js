@@ -6,8 +6,11 @@ class BookController {
 
     async index(request, response, next) {
         try {
-            const books = await this.bookService.getBooks(request.query);
-            response.status(200).json(books);
+            const { books, meta } = await this.bookService.getBooks(request.query);
+            response.status(200).json({
+                books,
+                meta
+            });
         } catch (exception) {
             next(exception);
         }

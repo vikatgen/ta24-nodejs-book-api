@@ -21,8 +21,8 @@ class BookService {
         const prismaQuery = Builder.buildPrismaQuery();
 
         const [books, count] = await Promise.all([
-            await this.repository.getAll(prismaQuery),
-            await this.repository.count(prismaQuery)
+            this.repository.getAll(prismaQuery),
+            this.repository.count(prismaQuery)
         ]);
 
         const meta = Builder.getPaginationMeta(count);
