@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "server": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "migrate:prod": "npx prisma migrate deploy",
+    "migrate:dev": "npx prisma migrate dev",
     "db:seed": "prisma db seed"
   },
   "keywords": [],
@@ -19,7 +23,7 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "joi": "^18.0.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "9.0.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.1.0",
