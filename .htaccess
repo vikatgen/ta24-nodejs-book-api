@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^(.*)$ http://127.1.107.194:3000/$1 [P,L]

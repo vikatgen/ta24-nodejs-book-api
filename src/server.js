@@ -14,6 +14,7 @@ const swaggerDocument = YAML.load('./src/docs/swagger.yml');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || 'localhost';
 
 app.use(limiter);
 app.use(helmet());
@@ -44,7 +45,7 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+    console.log(`Server is running on http://${HOST}:${PORT}`);
 });
 
