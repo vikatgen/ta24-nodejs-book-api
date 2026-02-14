@@ -22,5 +22,5 @@ jobs:
             git fetch --tags
             git checkout ${{ github.ref_name }}
             npm install --production
-            npx prisma migrate deploy
+            export $(cat .env | xargs) && npx prisma migrate deploy
             pm2 restart ecosystem.config.cjs
