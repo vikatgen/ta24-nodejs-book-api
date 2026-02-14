@@ -31,7 +31,7 @@ class AuthorService {
     }
 
     async getAuthorById(id){
-        const book = await this.repository.author.getAuthorById(id);
+        const book = await this.repository.getAuthorById(id);
         if (!book) throw new NotFoundError(`Author with id ${id} not found`);
 
         return book;
@@ -42,7 +42,7 @@ class AuthorService {
     }
 
     async updateAuthor(authorId, author){
-        const response = this.repository.updateAuthor(authorId, {...author});
+        const response = await this.repository.updateAuthor(authorId, {...author});
         if(!response) throw new NotFoundError(`Author with id ${authorId} not found`);
 
         return response;
