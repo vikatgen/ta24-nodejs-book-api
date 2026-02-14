@@ -20,10 +20,6 @@ export class QueryBuilder {
         page = isNaN(page) || page < 1 ? this.options.defaultPage : page;
         take = isNaN(take) || take < 1 ? this.options.defaultTake : take;
 
-        console.log("Page: ", page);
-        console.log((page - 1) * take);
-
-
         return {
             skip: (page - 1) * take,
             take

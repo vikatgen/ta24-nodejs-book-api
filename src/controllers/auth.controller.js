@@ -1,17 +1,15 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import prisma from '../config/prisma.js';
-import dotenv from 'dotenv';
 import ExistingEntityError from "../utils/ExistingEntityError.js";
 import NotFoundError from "../utils/NotFoundError.js";
 import AuthenticationError from "../utils/AuthenticationError.js";
-
-dotenv.config();
 
 export const register = async (request, response, next) => {
     try {
         const { email, password } = request.body;
 
+        // TODO: Refactor to repository level for testability @vikatgen
         const existingUser = await prisma.user.findUnique({ where: { email } });
 
         if (existingUser) throw new ExistingEntityError("Incorrect credentials");

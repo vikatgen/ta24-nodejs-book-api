@@ -16,7 +16,7 @@ class BookController {
         }
     }
 
-    async edit(request, response, next) {
+    async show(request, response, next) {
         try {
             const book = await this.bookService.getBookById(request.params.id);
             response.status(200).json(book);

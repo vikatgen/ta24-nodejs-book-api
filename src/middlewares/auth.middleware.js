@@ -9,6 +9,8 @@ export const authenticateToken = async (request, response, next) => {
             if (!token) throw new AuthenticationError("Token not provided");
 
             const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+            // TODO: Refactor to repository level for testability @vikatgen
             const user = await prisma.user.findUnique({ where: { id: payload.id } });
             if (!user) throw new AuthenticationError("Invalid token");
 

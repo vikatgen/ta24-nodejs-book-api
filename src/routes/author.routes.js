@@ -15,7 +15,7 @@ const controller = new AuthorController(service);
 const router = Router();
 
 router.get('/authors', controller.index.bind(controller));
-router.get('/authors/:id', controller.edit.bind(controller));
+router.get('/authors/:id', controller.show.bind(controller));
 router.post('/authors', authenticateToken, validate(authorSchema), controller.create.bind(controller));
 router.put('/authors/:id', authenticateToken, validate(authorSchema), controller.update.bind(controller));
 router.delete('/authors/:id', authenticateToken, controller.delete.bind(controller));

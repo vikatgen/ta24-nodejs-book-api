@@ -8,7 +8,6 @@ class CategoryController {
         try {
             const { categories, meta } = await this.categoryService.getCategory(request.query);
             response.status(200).json({
-                message: 'All categories',
                 data: categories,
                 meta
             });
@@ -20,12 +19,9 @@ class CategoryController {
     async create(request, response, next) {
         try {
             const { name } = request.body;
-            const createdEntity = await this.categoryService.createCategory(name);
+            await this.categoryService.createCategory(name);
 
-            response.status(201).json({
-                message: 'Category created',
-                data: { ...createdEntity }
-            })
+            response.sendStatus(201);
         } catch(exception) {
             next(exception);
         }
@@ -35,12 +31,9 @@ class CategoryController {
         try {
             const { id } = request.params;
             const { name } = request.body;
+            await this.categoryService.updateCategory(id, name);
 
-            const updatedEntity = await this.categoryService.updateCategory(id, name);
-            response.status(200).json({
-                message: 'Category updated',
-                data: { ...updatedEntity }
-            })
+            response.sendStatus(200)
         } catch (exception) {
             next(exception);
         }
@@ -51,9 +44,7 @@ class CategoryController {
             const { id } = request.params;
             await this.categoryService.deleteCategory(Number(id));
 
-            response.status(204).json({
-                message: 'Category deleted',
-            })
+            response.sendStatus(204)
         } catch (exception) {
             next(exception);
         }

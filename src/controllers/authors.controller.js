@@ -16,7 +16,7 @@ class AuthorController {
         }
     }
 
-    async edit(request, response, next) {
+    async show(request, response, next) {
         try {
             const author = await this.authorService.getAuthorById(request.params.id);
             response.status(200).json(author);
