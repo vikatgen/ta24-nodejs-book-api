@@ -1,0 +1,26 @@
+name: Deploy to ZONE.EE
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd ~/domeenid/www.ta19vikat.itmajakas.ee/ta24-book-api
+            git fetch --tags
+            git checkout ${{ github.ref_name }}
+            npm install --production
+            npx prisma migrate deploy
+            pm2 restart ecosystem.config.cjs
