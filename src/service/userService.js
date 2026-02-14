@@ -13,8 +13,12 @@ class UserService {
         return user;
     }
 
-    async createUser() {
+    async checkUserExists(email) {
+        return !!await this.repository.getUserByEmail(email);
+    }
 
+    async createUser(user) {
+        return this.repository.createUser(user);
     }
 }
 

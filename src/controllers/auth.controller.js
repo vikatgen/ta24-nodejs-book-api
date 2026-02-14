@@ -10,7 +10,9 @@ class AuthController {
 
     async register(request, response, next) {
         try {
-            await this.service.getUserByEmail(request.body?.email);
+            const existingUser = await this.service.checkUserExists(request.body?.email);
+            if (existingUser) throw new AuthenticationError("Invalid credentials")
+            
             const hashedPassword = await bcrypt.hash(request.body?.password, 12);
 
             await this.service.createUser({
