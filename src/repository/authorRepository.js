@@ -21,11 +21,11 @@ class AuthorRepository {
     }
 
     async updateAuthor(id, author) {
-        return this.prisma.authors.update({ where: { id }, data: author });
+        return this.prisma.author.update({ where: { id: Number(id) }, data: author });
     }
 
     async deleteAuthor(id) {
-        return this.prisma.authors.delete({ where: { id: Number(id) }});
+        return this.prisma.author.delete({ where: { id: Number(id) }});
     }
 }
 

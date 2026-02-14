@@ -1,5 +1,6 @@
 import express from 'express';
 import helmet from "helmet";
+import 'dotenv/config';
 import limiter from "./config/rateLimiter.js";
 import bookRoutes from './routes/book.routes.js';
 import authorRoutes from "./routes/author.routes.js";
@@ -8,13 +9,13 @@ import categoryRoutes from "./routes/category.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(limiter);
 app.use(helmet());
 app.use(express.json());
 
-app.get('/welcome', (request, response) => {
+app.get('/', (request, response) => {
     response.send({
         message: 'Welcome to the API',
     });

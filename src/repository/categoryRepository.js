@@ -19,14 +19,14 @@ class CategoryRepository {
     async update(id, name) {
         return this.prisma.category.update(
             {
-                where: { id },
+                where: { id: Number(id) },
                 data: { name }
             }
         );
     }
 
     async destroy(id) {
-        return this.prisma.category.delete( { where: { id } } );
+        return this.prisma.category.delete( { where: { id: Number(id) }});
     }
 }
 
