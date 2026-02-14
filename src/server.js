@@ -1,5 +1,7 @@
 import express from 'express';
 import helmet from "helmet";
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 import 'dotenv/config';
 import limiter from "./config/rateLimiter.js";
 import bookRoutes from './routes/book.routes.js';
@@ -8,12 +10,16 @@ import authRoutes from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
+const swaggerDocument = YAML.load('./src/docs/swagger.yml');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(limiter);
 app.use(helmet());
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get('/', (request, response) => {
     response.send({
