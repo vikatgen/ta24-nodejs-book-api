@@ -1,141 +1,56 @@
-import prisma from '../config/prisma.js';
-import {QueryBuilder} from "../utils/QueryBuilder.js";
+class AuthorController {
 
-export const getAllAuthors = async (request, response) => {
-    try {
-        const Builder = new QueryBuilder(request.query, {
-            defaultSort: 'created_at',
-            defaultTake: 10,
-            allowedSorts: ['created_at', 'name'],
-            allowedSearchFields: ['name'],
-            allowedIncludes: {
-                'books': { include: { book: true }}
-            }
-        });
-
-        const prismaQuery = Builder.buildPrismaQuery();
-
-        const [authors, count] = await Promise.all([
-            prisma.author.findMany(prismaQuery),
-            prisma.author.count({ where: prismaQuery.where })
-        ]);
-
-        const meta = Builder.getPaginationMeta(count);
-
-        response.status(200).json({
-            message: 'All authors',
-            data: authors,
-            meta
-        });
-    } catch (exception) {
-        console.log(exception);
-        response.status(500).json({
-            message: "Something went wrong",
-            error: exception.message
-        })
+    constructor(authorService) {
+        this.authorService = authorService;
     }
-};
 
-export const getAuthorById = async (request, response) => {
-    try {
-        const idFromURL = request.params?.id;
-
-        const book = await prisma.author.findUnique({
-            where: {
-                id: Number(idFromURL)
-            }
-        });
-
-        if (!book) {
-            response.status(404).json({
-                message: 'Not Found'
-            })
+    async index(request, response, next) {
+        try {
+            const { authors, meta} = await this.authorService.getAuthors(request.query);
+            response.status(200).json({
+                authors,
+                meta
+            });
+        } catch (exception) {
+            next(exception);
         }
-
-        response.status(200).json({
-            message: 'Successfully Found Author',
-            data: book
-        })
-    } catch (exception) {
-        response.status(500).json({
-            message: 'Something went wrong',
-            error: exception.message
-        })
     }
-};
 
-export const createAuthor = async (request, response) => {
-    try {
-        const { name } = request.body;
-
-        const newBook = await prisma.author.create({
-            data: {
-                name
-            }
-        });
-
-        response.status(201).json({
-            message: 'Successfully Created Author',
-            data: newBook
-        })
-    } catch (exception) {
-        response.status(500).json({
-            message: 'Something went wrong',
-            error: exception.message
-        })
-    }
-};
-
-export const updateAuthor = async (request, response) => {
-    try {
-        const { id } = request.params;
-        const { name } = request.body;
-
-        const updatedBook = await prisma.author.update({
-            where: {
-                id: Number(id),
-            },
-            data: {
-                name
-            }
-        });
-
-        if (!updatedBook) {
-            response.status(404).json({
-                message: 'Not Found'
-            })
+    async edit(request, response, next) {
+        try {
+            const author = await this.authorService.getAuthorById(request.params.id);
+            response.status(200).json(author);
+        } catch (exception) {
+            next(exception);
         }
-
-        response.status(200).json({
-            message: 'Successfully Updated Author',
-            data: updatedBook
-        })
-
-    } catch (exception) {
-        response.status(500).json({
-            message: 'Something went wrong',
-            error: exception.message
-        })
     }
-};
 
-export const deleteAuthor = async (request, response) => {
-    try {
-        const bookId = request.params?.id;
-
-        await prisma.author.delete({
-            where: {
-                id: Number(bookId)
-            }
-        })
-
-        response.status(200).json({
-            message: 'Successfully Deleted',
-        })
-    } catch (exception) {
-        response.status(500).json({
-            message: 'Something went wrong',
-            error: exception.message
-        })
+    async create(request, response, next) {
+        try {
+            await this.authorService.createAuthor(request.body);
+            response.sendStatus(201);
+        } catch (exception) {
+            next(exception);
+        }
     }
-};
+
+    async update(request, response, next) {
+        try {
+            await this.authorService.updateAuthor(request.params.id, request.body);
+            response.sendStatus(200);
+        } catch (exception) {
+            next(exception);
+        }
+    }
+
+    async delete(request, response, next) {
+        try {
+            await this.authorService.deleteAuthor(request.params.id);
+            response.sendStatus(204);
+        } catch (exception) {
+            next(exception);
+        }
+    }
+}
+
+export default AuthorController;
