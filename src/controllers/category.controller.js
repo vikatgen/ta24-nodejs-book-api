@@ -7,10 +7,7 @@ class CategoryController {
     async index(request, response, next) {
         try {
             const { categories, meta } = await this.categoryService.getCategory(request.query);
-            response.status(200).json({
-                data: categories,
-                meta
-            });
+            response.status(200).json({ categories, meta });
         } catch (exception) {
             next(exception);
         }
@@ -52,6 +49,3 @@ class CategoryController {
 }
 
 export default CategoryController;
-
-// TODO: @vikatgen uuri, mis värk on
-/*export default new CategoryController(new CategoryService(CategoryRepository));*/

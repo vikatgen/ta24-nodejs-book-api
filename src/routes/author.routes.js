@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { validate } from "../middlewares/validator.middleware.js";
 import {authorSchema} from "../validations/author.validation.js";
-import {authenticateToken} from "../middlewares/auth.middleware.js";
+import {authenticationMiddleware} from "../middlewares/auth.middleware.js";
 
 import prisma from "../config/prisma.js";
 import AuthorRepository from "../repository/authorRepository.js";
@@ -11,6 +11,7 @@ import AuthorController from "../controllers/authors.controller.js";
 const repository = new AuthorRepository(prisma);
 const service = new AuthorService(repository);
 const controller = new AuthorController(service);
+const authenticateToken = authenticationMiddleware(prisma);
 
 const router = Router();
 
