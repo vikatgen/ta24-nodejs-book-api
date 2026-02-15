@@ -7,24 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum BookStatus {
+  AVAILABLE
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
   password   String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  bookings   Booking[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 }
 
 model Book {
-  id            Int            @id @default(autoincrement())
+  id            Int              @id @default(autoincrement())
   title         String
   description   String
   thumbnail_url String
   release_year  Int
+  status        BookStatus       @default(OUT_OF_STOCK)
+  stock         Int              @default(0)
+  rent_price    Float            @default(0)
   authors       AuthorOnBook[]
-  categories CategoryOnBook[]
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
+  categories    CategoryOnBook[]
+  bookings      Booking[]
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
 }
 
 model Author {
@@ -36,11 +47,23 @@ model Author {
 }
 
 model Category {
-  id Int @id @default(autoincrement())
-  name String @unique
-  books CategoryOnBook[]
-  created_at DateTime       @default(now())
-  updated_at DateTime       @updatedAt
+  id         Int              @id @default(autoincrement())
+  name       String           @unique
+  books      CategoryOnBook[]
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+}
+
+model Booking {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id     Int
+  book        Book      @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  book_id     Int
+  return_date DateTime
+  returned_at DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
 }
 
 model AuthorOnBook {
@@ -54,11 +77,11 @@ model AuthorOnBook {
 }
 
 model CategoryOnBook {
-  id Int @id @default(autoincrement())
-  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
-  book_id Int
-  category Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  book        Book     @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  book_id     Int
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
   category_id Int
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 }

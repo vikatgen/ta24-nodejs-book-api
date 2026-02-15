@@ -15,6 +15,55 @@ components:
       bearerFormat: JWT
 
   schemas:
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        book_id:
+          type: integer
+        return_date:
+          type: string
+          format: date-time
+        returned_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        book:
+          $ref: '#/components/schemas/Book'
+
+    BookingInput:
+      type: object
+      required:
+        - book_id
+        - return_date
+      properties:
+        book_id:
+          type: integer
+          minimum: 1
+        return_date:
+          type: string
+          format: date-time
+          description: "Must be within 30 days from now"
+
+    BookingListResponse:
+      type: object
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
     Book:
       type: object
       properties:
@@ -29,6 +78,14 @@ components:
           format: uri
         release_year:
           type: integer
+        stock:
+          type: integer
+        rent_price:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [ AVAILABLE, LOW_STOCK, OUT_OF_STOCK ]
         created_at:
           type: string
           format: date-time
@@ -55,6 +112,12 @@ components:
         release_year:
           type: integer
           minimum: 1
+        stock:
+          type: integer
+          minimum: 0
+        rent_price:
+          type: number
+          minimum: 0
 
     Author:
       type: object
@@ -710,5 +773,171 @@ paths:
           description: Category deleted successfully
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /api/v1/bookings:
+    get:
+      summary: List my bookings (paginated)
+      tags:
+        - Bookings
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: take
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [ id, created_at, return_date ]
+            default: created_at
+        - name: include
+          in: query
+          description: Include related resources
+          schema:
+            type: string
+            enum: [ book ]
+      responses:
+        '200':
+          description: Paginated list of user's bookings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+    post:
+      summary: Create a new booking (rent a book)
+      tags:
+        - Bookings
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingInput'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Bad request (out of stock, invalid return date, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Duplicate active booking for this book
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /api/v1/bookings/{id}:
+    get:
+      summary: Get a single booking by ID
+      tags:
+        - Bookings
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+    delete:
+      summary: Cancel a booking
+      description: Cancels and deletes the booking. If the booking is still active (not returned), the book stock is restored.
+      tags:
+        - Bookings
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Booking cancelled successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /api/v1/bookings/{id}/return:
+    patch:
+      summary: Return a rented book
+      tags:
+        - Bookings
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Book already returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/TooManyRequests'
