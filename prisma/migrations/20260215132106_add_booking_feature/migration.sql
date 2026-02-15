@@ -1,0 +1,23 @@
+-- AlterTable
+ALTER TABLE `Book` ADD COLUMN `rent_price` DOUBLE NOT NULL DEFAULT 0,
+    ADD COLUMN `status` ENUM('AVAILABLE', 'LOW_STOCK', 'OUT_OF_STOCK') NOT NULL DEFAULT 'OUT_OF_STOCK',
+    ADD COLUMN `stock` INTEGER NOT NULL DEFAULT 0;
+
+-- CreateTable
+CREATE TABLE `Booking` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `book_id` INTEGER NOT NULL,
+    `return_date` DATETIME(3) NOT NULL,
+    `returned_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Booking` ADD CONSTRAINT `Booking_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Booking` ADD CONSTRAINT `Booking_book_id_fkey` FOREIGN KEY (`book_id`) REFERENCES `Book`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

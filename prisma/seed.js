@@ -2,8 +2,9 @@ import prisma from "../src/config/prisma.js";
 import { faker } from "@faker-js/faker/locale/en";
 
 const databaseSeeder = async () => {
-    await prisma.author.deleteMany();
+    await prisma.booking.deleteMany();
     await prisma.book.deleteMany();
+    await prisma.author.deleteMany();
     await prisma.category.deleteMany();
 
     console.log('🌱 Starting to seed database...');
@@ -43,7 +44,12 @@ const databaseSeeder = async () => {
     for(let i = 0; i < 50; i++) {
         const randomAuthor = authors[faker.number.int({ min: 0, max: authors.length - 1})];
         const randomCategory = categoriesFromDatabase[faker.number.int({ min: 0, max: categoriesFromDatabase.length - 1})];
+        const stock = faker.number.int({ min: 0, max: 20 });
 
+        let status;
+        if (stock <= 0) status = 'OUT_OF_STOCK';
+        else if (stock <= 3) status = 'LOW_STOCK';
+        else status = 'AVAILABLE';
 
         const book = await prisma.book.create({
             data: {
@@ -51,6 +57,9 @@ const databaseSeeder = async () => {
                 description: faker.lorem.sentence(),
                 thumbnail_url: faker.image.url(),
                 release_year: new Date(faker.date.anytime()).getFullYear(),
+                stock: stock,
+                rent_price: parseFloat(faker.commerce.price({ min: 1, max: 15, dec: 2 })),
+                status: status,
                 categories: {
                     create: {
                         category: {
@@ -80,5 +89,3 @@ try {
     prisma.$disconnect();
     process.exit(1);
 }
-
-

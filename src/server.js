@@ -8,6 +8,7 @@ import bookRoutes from './routes/book.routes.js';
 import authorRoutes from "./routes/author.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 const swaggerDocument = YAML.load('./src/docs/swagger.yml');
@@ -32,6 +33,7 @@ app.use('/api/v1', authRoutes);
 app.use('/api/v1', bookRoutes);
 app.use('/api/v1', authorRoutes);
 app.use('/api/v1', categoryRoutes);
+app.use('/api/v1', bookingRoutes);
 
 app.use(errorHandler);
 
